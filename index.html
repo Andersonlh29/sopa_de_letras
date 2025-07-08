@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sopa de Letras</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #fff;
+    }
+
+    .container {
+      width: 1700px;
+      height: 1700px;
+      border: 8px solid;
+      border-image: linear-gradient(90deg, #7e57c2, #49454b) 1;
+      animation: borderShift 8s ease-in-out infinite alternate;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @keyframes borderShift {
+      0% {
+        border-image: linear-gradient(90deg, #7e57c2, #49454b) 1;
+      }
+      100% {
+        border-image: linear-gradient(90deg, #49454b, #7e57c2) 1;
+      }
+    }
+
+    #animated-title {
+      font-size: 58px;
+      text-align: center;
+      display: inline-block;
+      padding: 10px 20px;
+      background: linear-gradient(90deg, #7e57c2, #49454b);
+      background-size: 200% 100%;
+      background-position: left;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: left; }
+      100% { background-position: right; }
+    }
+
+    .input-area {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .icon svg {
+      animation: rotateIcon 10s linear infinite;
+    }
+
+    @keyframes rotateIcon {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    textarea {
+      margin-left: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      border: 3px solid;
+      border-image: linear-gradient(90deg, #7e57c2, #49454b) 1;
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+      animation: borderShift 8s ease-in-out infinite alternate;
+    }
+
+    .sopa-area {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    #wordList {
+      text-align: left;
+      font-size: 20px;
+    }
+
+    #wordList ol {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="animated-title">Generador de Sopa de Letras</h1>
+
+    <div class="input-area">
+      <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7e57c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3" y2="6"></line>
+          <line x1="3" y1="12" x2="3" y2="12"></line>
+          <line x1="3" y1="18" x2="3" y2="18"></line>
+        </svg>
+      </div>
+
+      <textarea id="wordInput" placeholder="Escribe palabras separadas por coma"></textarea>
+      <button id="generateBtn">Generar Sopa</button>
+    </div>
+
+    <div class="sopa-area">
+      <div id="canvas-container"></div>
+      <div id="wordList"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.min.js"></script>
+  <script>
+    let gridSize = 24;   
+    let cellSize = 40;   
+    let grid = [];
+    let words = [];
+
+    function setup() {
+      let canvas = createCanvas(gridSize * cellSize, gridSize * cellSize);
+      canvas.parent('canvas-container');
+      noLoop();
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', () => {
+      const input = document.getElementById('wordInput').value;
+      words = input.split(',').map(w => w.trim().toUpperCase()).filter(w => w.length > 0);
+
+      grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
+
+      // ✅ Re-crear tamaño si es necesario
+      resizeCanvas(gridSize * cellSize, gridSize * cellSize);
+
+      placeWords();
+      fillEmptyCells();
+      redraw();
+
+      document.getElementById('wordList').innerHTML =
+        '<p><strong>Palabras:</strong></p><ol>' +
+        words.map(word => `<li>${word}</li>`).join('') +
+        '</ol>';
+    });
+
+    function draw() {
+      background(255);
+      drawGrid();
+    }
+
+    function drawGrid() {
+      textAlign(CENTER, CENTER);
+      textSize(20);
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          fill(255);
+          stroke(0);
+          rect(j * cellSize, i * cellSize, cellSize, cellSize);
+          fill(0);
+          text(grid[i][j], j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
+        }
+      }
+    }
+
+    function placeWords() {
+      const directions = [
+        { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 },
+        { x: 1, y: 1 }, { x: -1, y: -1 }, { x: -1, y: 1 }, { x: 1, y: -1 }
+      ];
+
+      words.forEach(word => {
+        let placed = false;
+        let attempts = 0;
+
+        while (!placed && attempts < 500) {
+          attempts++;
+          const dir = random(directions);
+          const startRow = floor(random(gridSize));
+          const startCol = floor(random(gridSize));
+
+          const endRow = startRow + dir.y * (word.length - 1);
+          const endCol = startCol + dir.x * (word.length - 1);
+
+          if (endRow < 0 || endRow >= gridSize || endCol < 0 || endCol >= gridSize) continue;
+
+          let collision = false;
+
+          for (let i = 0; i < word.length; i++) {
+            const row = startRow + dir.y * i;
+            const col = startCol + dir.x * i;
+
+            if (grid[row][col] !== '' && grid[row][col] !== word[i]) {
+              collision = true;
+              break;
+            }
+          }
+
+          if (collision) continue;
+
+          for (let i = 0; i < word.length; i++) {
+            const row = startRow + dir.y * i;
+            const col = startCol + dir.x * i;
+            grid[row][col] = word[i];
+          }
+
+          placed = true;
+        }
+
+        if (!placed) {
+          console.warn(`No se pudo colocar la palabra: ${word}`);
+        }
+      });
+    }
+
+    function fillEmptyCells() {
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          if (grid[i][j] === '') {
+            grid[i][j] = letters.charAt(floor(random(letters.length)));
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+
+

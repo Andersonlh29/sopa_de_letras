@@ -1,0 +1,111 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: 1700px;
+  height: 1700px;
+  border: 8px solid;
+  border-image: linear-gradient(90deg, #7e57c2, #49454b) 1;
+  animation: borderShift 8s ease-in-out infinite alternate;
+  padding: 30px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes borderShift {
+  0% {
+    border-image: linear-gradient(90deg, #7e57c2, #49454b) 1;
+  }
+  100% {
+    border-image: linear-gradient(90deg, #49454b, #7e57c2) 1;
+  }
+}
+
+h1 {
+  font-size: 58px;
+  margin-bottom: 50px;
+  background: linear-gradient(90deg, #7e57c2, #49454b);
+  background-size: 200% 100%;
+  background-position: left;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 8s ease-in-out infinite alternate;
+}
+
+@keyframes gradientShift {
+  0% { background-position: left; }
+  100% { background-position: right; }
+}
+
+.input-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.icon svg {
+  width: 40px;
+  height: 40px;
+  animation: rotateIcon 10s linear infinite;
+}
+
+@keyframes rotateIcon {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+textarea {
+  width: 400px;
+  height: 100px;
+  font-size: 18px;
+  padding: 15px;
+}
+
+#generateBtn {
+  background: #ffffff;
+  color: #333;
+  border: 3px solid;
+  border-image: linear-gradient(90deg, #7e57c2, #49454b) 1;
+  padding: 12px 24px;
+  font-size: 20px;
+  cursor: pointer;
+  animation: borderShift 8s ease-in-out infinite alternate;
+}
+
+.sopa-area {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+#wordList {
+  text-align: left;
+  font-size: 23px;
+  font-weight: bold;
+}
+
+#wordList ol {
+  list-style: decimal;
+  padding-left: 20px;
+}
+
+#canvas-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+
+
