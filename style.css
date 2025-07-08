@@ -10,7 +10,7 @@ body {
 
 .container {
   width: 1700px;
-  height: 1700px;
+  height: 1600px;
   border: 8px solid;
   border-image: linear-gradient(90deg, #7e57c2, #49454b) 1;
   animation: borderShift 8s ease-in-out infinite alternate;
